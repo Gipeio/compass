@@ -7,24 +7,15 @@
     @dragover.prevent
     @drop.prevent="onDrop"
   >
-    <!-- ── HUD ──────────────────────────────────────────────── -->
-    <header class="hud">
-      <div class="hud-inner">
-        <div class="hud-brand">
-          <img src="/logo.svg" alt="" class="hud-logo" />
-          <span class="hud-title">Compass</span>
-        </div>
-        <div class="hud-stats">
-          <div class="hud-stat">
-            <span class="label">PROJECTS</span>
-            <span class="value">{{ pad(projects.length) }}</span>
-          </div>
-          <div v-if="activeProject" class="hud-stat">
-            <span class="label">STAGES</span>
-            <span class="value">{{ pad(activeProject.features.length) }}</span>
-          </div>
-        </div>
-      </div>
+    <!-- ── ASCII header — replaces HUD ─────────────────────── -->
+    <header class="app-header-section">
+      <pre class="app-ascii-title"> ██████╗  ██████╗ ███╗   ███╗██████╗  █████╗ ███████╗███████╗
+██╔════╝██╔═══██╗████╗ ████║██╔══██╗██╔══██╗██╔════╝██╔════╝
+██║     ██║   ██║██╔████╔██║██████╔╝███████║███████╗███████╗
+██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██╔══██║╚════██║╚════██║
+╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ██║  ██║███████║███████║
+ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝</pre>
+      <div class="app-ascii-sub">project planner · {{ projects.length }} project{{ projects.length !== 1 ? 's' : '' }}{{ activeProject ? ' · ' + activeProject.features.length + ' stage' + (activeProject.features.length !== 1 ? 's' : '') : '' }} — v0.1</div>
     </header>
 
     <!-- ── 3-panel body ─────────────────────────────────────── -->
@@ -100,17 +91,6 @@
 
       <!-- RIGHT: template form or stage editor ─────────────── -->
       <div class="app-reading">
-
-        <!-- ASCII app header — mirrors Glaze t-header-section pattern -->
-        <div class="app-header-section">
-          <pre class="app-ascii-title"> ██████╗  ██████╗ ███╗   ███╗██████╗  █████╗ ███████╗███████╗
-██╔════╝██╔═══██╗████╗ ████║██╔══██╗██╔══██╗██╔════╝██╔════╝
-██║     ██║   ██║██╔████╔██║██████╔╝███████║███████╗███████╗
-██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██╔══██║╚════██║╚════██║
-╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ██║  ██║███████║███████║
- ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝</pre>
-          <div class="app-ascii-sub">project planner · version planning tool — v0.1</div>
-        </div>
 
         <!-- Template form -->
         <template v-if="activeProject && rightPanel === 'template'">

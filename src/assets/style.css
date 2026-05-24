@@ -38,65 +38,32 @@ html, body, #app {
   line-height: 1.55;
 }
 
-/* ── HUD bar ──────────────────────────────────────────────── */
+/* ── App ASCII header — full-width, replaces HUD ─────────────────────────── */
 
-.hud {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: var(--t-surface);
-  border-bottom: 3px solid var(--t-accent);
-  flex-shrink: 0;
-}
-
-.hud-inner {
-  padding: 10px 16px;
+.app-header-section {
+  padding: 16px 24px 14px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 3px solid var(--t-surface);
+  flex-shrink: 0;
+  background: var(--t-bg);
 }
 
-.hud-brand { display: flex; align-items: center; gap: 10px; }
-
-/* Pixel-perfect at 2× (logo is 17×14 px native) */
-.hud-logo { width: 34px; height: 28px; image-rendering: pixelated; }
-
-.hud-title {
-  font-family: var(--font-head);
-  font-weight: 900;
-  font-size: 22px;
-  color: var(--t-bg);
-  letter-spacing: -0.02em;
-  line-height: 1;
+.app-ascii-title {
+  font-size: 11px;
+  line-height: 1.18;
+  color: var(--t-accent);
+  white-space: pre;
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  margin: 0;
 }
 
-.hud-stats { display: flex; gap: 20px; align-items: center; }
-
-.hud-stat { display: flex; flex-direction: column; align-items: flex-end; }
-
-.hud-stat .label {
-  font-family: var(--font-mono);
-  font-size: 8px;
-  color: rgba(238, 226, 222, 0.6);
-  letter-spacing: 0.14em;
-}
-
-.hud-stat .value {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: rgba(238, 226, 222, 0.85);
-}
-
-/* Ghost buttons inside the salmon HUD */
-.hud .btn-ghost {
-  color: rgba(238, 226, 222, 0.85);
-  border-color: rgba(238, 226, 222, 0.35);
-}
-.hud .btn-ghost:hover:not(:disabled) {
-  color: var(--t-bg);
-  border-color: rgba(238, 226, 222, 0.7);
-  background: rgba(238, 226, 222, 0.1);
+.app-ascii-sub {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--t-muted-2);
+  font-family: ui-monospace, monospace;
 }
 
 /* ── App shell (3-panel layout) ───────────────────────────── */
