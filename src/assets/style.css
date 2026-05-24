@@ -38,34 +38,6 @@ html, body, #app {
   line-height: 1.55;
 }
 
-/* ── App ASCII header — full-width, replaces HUD ─────────────────────────── */
-
-.app-header-section {
-  padding: 16px 24px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  border-bottom: 3px solid var(--t-surface);
-  flex-shrink: 0;
-  background: var(--t-bg);
-}
-
-.app-ascii-title {
-  font-size: 11px;
-  line-height: 1.18;
-  color: var(--t-accent);
-  white-space: pre;
-  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
-  margin: 0;
-}
-
-.app-ascii-sub {
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  color: var(--t-muted-2);
-  font-family: ui-monospace, monospace;
-}
-
 /* ── App shell (3-panel layout) ───────────────────────────── */
 
 .app { height: 100%; display: flex; flex-direction: column; }
@@ -847,15 +819,39 @@ html, body, #app {
   border: 1px solid var(--t-surface);
 }
 
-/* ── App header section (ASCII title) — mirrors Glaze t-header-section ────── */
+/* ── App ASCII header — LCD terminal aesthetic (inspired by Glaze t01-écran) ── */
+
+@keyframes header-cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
 
 .app-header-section {
   padding: 20px 24px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border-bottom: 1px solid var(--t-border-2);
+  border-bottom: 2px solid var(--t-accent);
   flex-shrink: 0;
+  background: color-mix(in srgb, var(--t-text) 90%, var(--t-bg));
+  position: relative;
+  overflow: hidden;
+}
+
+/* Scanlines overlay — the defining LCD effect */
+.app-header-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    color-mix(in srgb, var(--t-text) 8%, transparent) 2px,
+    color-mix(in srgb, var(--t-text) 8%, transparent) 3px
+  );
 }
 
 .app-ascii-title {
@@ -865,11 +861,24 @@ html, body, #app {
   white-space: pre;
   font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
   margin: 0;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 0 16px color-mix(in srgb, var(--t-accent) 50%, transparent);
 }
 
 .app-ascii-sub {
   font-size: 9px;
   letter-spacing: 0.08em;
-  color: var(--t-muted-2);
+  color: color-mix(in srgb, var(--t-bg) 60%, var(--t-muted-3));
   font-family: ui-monospace, monospace;
+  position: relative;
+  z-index: 2;
+}
+
+/* Blinking cursor at end of subtitle */
+.app-ascii-sub::after {
+  content: '█';
+  animation: header-cursor-blink 1.1s step-end infinite;
+  color: var(--t-accent);
+  margin-left: 2px;
 }
