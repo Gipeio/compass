@@ -38,6 +38,22 @@ html, body, #app {
   line-height: 1.55;
 }
 
+/* Global LCD scanlines — fixed overlay covers every surface (Glaze t01-écran pattern) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    color-mix(in srgb, var(--t-text) 5%, transparent) 2px,
+    color-mix(in srgb, var(--t-text) 5%, transparent) 3px
+  );
+}
+
 /* ── App shell (3-panel layout) ───────────────────────────── */
 
 .app { height: 100%; display: flex; flex-direction: column; }
@@ -834,24 +850,6 @@ html, body, #app {
   border-bottom: 2px solid var(--t-accent);
   flex-shrink: 0;
   background: var(--t-bg);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Scanlines — the defining LCD effect (faithful to Glaze t01-écran) */
-.app-header-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 2px,
-    color-mix(in srgb, var(--t-text) 5%, transparent) 2px,
-    color-mix(in srgb, var(--t-text) 5%, transparent) 3px
-  );
 }
 
 .app-ascii-title {
@@ -861,8 +859,6 @@ html, body, #app {
   white-space: pre;
   font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
   margin: 0;
-  position: relative;
-  z-index: 2;
 }
 
 .app-ascii-sub {
@@ -870,8 +866,6 @@ html, body, #app {
   letter-spacing: 0.08em;
   color: var(--t-muted);
   font-family: ui-monospace, monospace;
-  position: relative;
-  z-index: 2;
 }
 
 /* Blinking cursor at end of subtitle */
