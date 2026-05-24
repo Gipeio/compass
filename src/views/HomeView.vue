@@ -1,81 +1,90 @@
-<!-- Home screen — project list, import via drag & drop, create new project -->
+<!-- Home screen — project list, import via button or drag & drop anywhere -->
 <template>
-  <div class="page">
+  <div
+    class="page"
+    @dragenter.prevent="onDragEnter"
+    @dragleave.prevent="onDragLeave"
+    @dragover.prevent
+    @drop.prevent="onDrop"
+  >
     <header class="hud">
-      <div class="hud-brand">
-        <img src="/favicon.svg" alt="" class="hud-logo" />
-        <span class="hud-title">COMPASS</span>
-      </div>
-      <div class="hud-stats">
-        <div class="hud-stat">
-          <span class="label">PROJECTS</span>
-          <span class="value">{{ pad(projects.length) }}</span>
+      <div class="hud-inner">
+        <div class="hud-brand">
+          <img src="/logo.svg" alt="" class="hud-logo" />
+          <span class="hud-title">Compass</span>
+        </div>
+        <div class="hud-stats">
+          <div class="hud-stat">
+            <span class="label">PROJECTS</span>
+            <span class="value">{{ pad(projects.length) }}</span>
+          </div>
         </div>
       </div>
     </header>
 
-    <div class="page-content">
-      <!-- Import zone -->
-      <div
-        class="drop-zone"
-        :class="{ active: isDragging }"
-        @dragover.prevent="isDragging = true"
-        @dragleave="isDragging = false"
-        @drop.prevent="handleDrop"
-        @click="fileInput.click()"
-      >
-        <span class="icon">⬇</span>
-        <span class="label">DROP JSON FILES TO IMPORT</span>
-        <span class="sub">or click to browse</span>
-      </div>
-      <input ref="fileInput" type="file" accept=".json" multiple class="sr-only" @change="handleFileInput" />
+    <div class="page-content-wrap">
+      <div class="page-content">
+        <input ref="fileInput" type="file" accept=".json" multiple class="sr-only" @change="handleFileInput" />
 
-      <!-- Project list -->
-      <div class="section-header">
-        <span class="section-title">— MY PROJECTS —</span>
-        <button class="btn btn-primary" @click="showCreate = true">▶ NEW PROJECT</button>
-      </div>
-
-      <div class="ground"></div>
-
-      <div v-if="projects.length === 0" class="empty">
-        <span class="empty-icon">🗺</span>
-        <p class="empty-text">NO PROJECTS YET — START A NEW QUEST</p>
-      </div>
-
-      <div v-else class="card-grid">
-        <div
-          v-for="(project, i) in projects"
-          :key="project.id"
-          class="card"
-        >
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span class="card-num">{{ pad2(i + 1) }}</span>
-            <span class="card-name">{{ project.name }}</span>
+        <div class="section-header">
+          <span class="section-title">All projects</span>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn btn-ghost btn-sm" @click="fileInput.click()">⬇ Import</button>
+            <button class="btn btn-primary" @click="showCreate = true">+ New project</button>
           </div>
-          <div class="card-meta">
-            <span class="card-date">{{ formatDate(project.updatedAt) }}</span>
-            <span class="card-stages">{{ project.features.length }} STAGES</span>
-          </div>
-          <div class="card-actions">
-            <button class="btn btn-primary btn-sm" @click="$router.push(`/project/${project.id}`)">▶ OPEN</button>
-            <button class="btn btn-ghost btn-sm" @click="onExportJson(project)">⬇ JSON</button>
-            <button class="btn btn-danger btn-sm" @click="confirmDelete(project)">✕</button>
+        </div>
+
+        <div v-if="projects.length === 0" class="empty">
+          <span class="empty-icon">🧭</span>
+          <p class="empty-text">NO PROJECTS YET — CREATE ONE OR DROP A JSON FILE</p>
+        </div>
+
+        <div v-else class="card-grid">
+          <div
+            v-for="(project, i) in projects"
+            :key="project.id"
+            class="card"
+            style="cursor:pointer;"
+            @click="$router.push(`/project/${project.id}`)"
+          >
+            <div class="card-inner">
+              <div class="card-top">
+                <span class="card-num">{{ pad2(i + 1) }}</span>
+                <span class="card-name">{{ project.name }}</span>
+              </div>
+              <p v-if="project.template?.shortDescription" class="card-desc">
+                {{ project.template.shortDescription }}
+              </p>
+              <div class="card-meta">
+                <span class="card-date">{{ formatDate(project.updatedAt) }}</span>
+                <span class="card-stages">{{ project.features.length }} stages</span>
+              </div>
+              <div class="card-actions" @click.stop>
+                <button class="btn btn-ghost btn-sm" @click="onExportJson(project)">⬇ JSON</button>
+                <button class="btn btn-teal btn-sm" @click="openPrompt(project)">✦ Prompt</button>
+                <button class="btn btn-danger btn-sm" @click="confirmDelete(project)">✕</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Full-page drag overlay -->
+    <div v-if="isDragging" class="page-drag-overlay">
+      <span class="drop-message">⬇ DROP JSON FILES TO IMPORT</span>
     </div>
 
     <!-- Create project modal -->
     <div v-if="showCreate" class="overlay" @click.self="showCreate = false">
       <div class="modal">
         <div class="modal-header">
-          <span class="modal-title">NEW PROJECT</span>
+          <span class="modal-title">New project</span>
           <button class="btn btn-ghost btn-sm" @click="showCreate = false">✕</button>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label class="field-label" for="new-name">PROJECT NAME</label>
+            <label class="field-label" for="new-name">Project name</label>
             <input
               id="new-name"
               v-model="newName"
@@ -89,24 +98,52 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-ghost" @click="showCreate = false">CANCEL</button>
-          <button class="btn btn-primary" @click="createProject">▶ CREATE</button>
+          <button class="btn btn-ghost" @click="showCreate = false">Cancel</button>
+          <button class="btn btn-primary" @click="createProject">Create</button>
         </div>
       </div>
     </div>
+
+    <!-- Prompt modal -->
+    <div v-if="promptModal.open" class="overlay" @click.self="promptModal.open = false">
+      <div class="modal" style="max-width:760px;">
+        <div class="modal-header">
+          <span class="modal-title">✦ AI Planning Prompt</span>
+          <button class="btn btn-ghost btn-sm" @click="promptModal.open = false">✕</button>
+        </div>
+        <div class="modal-body" style="padding:0;">
+          <textarea
+            class="textarea"
+            readonly
+            :value="promptModal.text"
+            style="border:none;min-height:360px;font-size:12px;resize:none;background:var(--t-bg-dim-2);color:var(--t-text);"
+          ></textarea>
+        </div>
+        <div class="modal-footer">
+          <span v-if="promptModal.copied" class="save-indicator saved" style="margin-right:auto;">● Copied</span>
+          <button class="btn btn-ghost" @click="promptModal.open = false">Close</button>
+          <button class="btn btn-primary" @click="copyPrompt">⎘ Copy to clipboard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ctrl+S toast -->
+    <Transition name="toast">
+      <div v-if="toast" class="toast">{{ toast }}</div>
+    </Transition>
 
     <!-- Delete confirmation modal -->
     <div v-if="deleteTarget" class="overlay" @click.self="deleteTarget = null">
       <div class="modal">
         <div class="modal-header">
-          <span class="modal-title danger">⚠ DELETE PROJECT</span>
+          <span class="modal-title danger">Delete project</span>
         </div>
         <div class="modal-body">
-          <p>Delete <strong>{{ deleteTarget.name }}</strong>? This cannot be undone.</p>
+          <p>Delete <strong style="color:var(--t-accent); font-family:var(--font-head)">{{ deleteTarget.name }}</strong>? This cannot be undone.</p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-ghost" @click="deleteTarget = null">CANCEL</button>
-          <button class="btn btn-danger" @click="doDelete">✕ DELETE</button>
+          <button class="btn btn-ghost" @click="deleteTarget = null">Cancel</button>
+          <button class="btn btn-danger" @click="doDelete">Delete</button>
         </div>
       </div>
     </div>
@@ -114,22 +151,56 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { dbGetAll, dbSave, dbDelete } from '../composables/useDb.js'
-import { exportJson } from '../composables/useExport.js'
+import { exportJson, generatePrompt } from '../composables/useExport.js'
 
 const router = useRouter()
 
-const projects   = ref([])
-const showCreate = ref(false)
-const newName    = ref('')
-const nameError  = ref(false)
+const projects    = ref([])
+const showCreate  = ref(false)
+const newName     = ref('')
+const nameError   = ref(false)
 const deleteTarget = ref(null)
-const isDragging = ref(false)
-const fileInput  = ref(null)
+const fileInput   = ref(null)
+const promptModal = reactive({ open: false, text: '', copied: false })
+const toast       = ref('')
+let toastTimer    = null
 
-onMounted(loadProjects)
+// Drag counter prevents false negatives when crossing child elements
+const dragCounter = ref(0)
+const isDragging  = computed(() => dragCounter.value > 0)
+
+function onDragEnter(e) {
+  if (e.dataTransfer?.types?.includes('Files')) dragCounter.value++
+}
+function onDragLeave() {
+  dragCounter.value = Math.max(0, dragCounter.value - 1)
+}
+function onDrop(e) {
+  dragCounter.value = 0
+  handleDrop(e)
+}
+
+function showToast(msg) {
+  toast.value = msg
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { toast.value = '' }, 2000)
+}
+
+function onKeydown(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault()
+    showToast('Open a project to export')
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', onKeydown)
+  loadProjects()
+})
+onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
 async function loadProjects() {
   const all = await dbGetAll()
@@ -146,9 +217,7 @@ async function createProject() {
   router.push(`/project/${project.id}`)
 }
 
-function confirmDelete(project) {
-  deleteTarget.value = project
-}
+function confirmDelete(project) { deleteTarget.value = project }
 
 async function doDelete() {
   await dbDelete(deleteTarget.value.id)
@@ -156,12 +225,21 @@ async function doDelete() {
   await loadProjects()
 }
 
-function onExportJson(project) {
-  exportJson(project)
+function onExportJson(project) { exportJson(project) }
+
+function openPrompt(project) {
+  promptModal.text   = generatePrompt(project)
+  promptModal.copied = false
+  promptModal.open   = true
+}
+
+async function copyPrompt() {
+  await navigator.clipboard.writeText(promptModal.text)
+  promptModal.copied = true
+  setTimeout(() => { promptModal.copied = false }, 2000)
 }
 
 async function handleDrop(e) {
-  isDragging.value = false
   await importFiles(e.dataTransfer.files)
 }
 

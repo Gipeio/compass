@@ -1,0 +1,135 @@
+/*
+ * Boot screen overlay — three phases: terminal boot → logo reveal → scan dismiss.
+ * All colors via --t-* tokens; app palette is applied before this renders.
+ */
+
+.boot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--t-bg);
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* ── Phase 1: terminal ── */
+
+.boot-terminal {
+  width: min(860px, 90vw);
+  padding: 10vh 0 0;
+  white-space: pre;
+}
+
+.boot-line {
+  display: block;
+  font-size: 11px;
+  line-height: 1.85;
+  opacity: 0;
+  transition: opacity 80ms ease;
+}
+
+.boot-line.visible { opacity: 1; }
+
+.bt-ts   { color: var(--t-muted); }
+.bt-ok   { color: var(--t-accent); font-weight: 600; }
+.bt-text { color: var(--t-text); }
+.bt-muted{ color: var(--t-muted); }
+
+/* ── Phase 2: logo ── */
+
+.boot-logo-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+
+.boot-logo-stage.visible { opacity: 1; }
+
+.boot-ascii {
+  font-size: 11px;
+  line-height: 1.18;
+  color: var(--t-accent);
+  white-space: pre;
+  margin: 0;
+  transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0);
+}
+
+.boot-ascii.lifted { transform: translateY(-28px); }
+
+.boot-pixel-logo {
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.boot-pixel-logo.visible { opacity: 1; }
+
+/* ── Phase 3: scan dismiss ── */
+
+/* Overlay is clipped from the top — reveals app strip by strip downward */
+@keyframes boot-scan-overlay {
+  from { clip-path: inset(0 0 0 0); }
+  to   { clip-path: inset(100% 0 0 0); }
+}
+
+@keyframes boot-scan-bar {
+  from { top: 0; }
+  to   { top: 100vh; }
+}
+
+/* steps(10) = 10 large strips — visible, mechanical scraping feel */
+.boot-overlay.scanning {
+  animation: boot-scan-overlay 640ms steps(6, end) forwards;
+}
+
+.boot-scan-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--t-accent);
+  z-index: 10000;
+  top: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.boot-scan-bar.active {
+  opacity: 1;
+  animation: boot-scan-bar 640ms steps(6, end) forwards;
+}
+
+/* ── Replay button (this repo only) ── */
+
+.boot-replay-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 9998;
+  background: rgba(26, 18, 8, 0.82);
+  border: 1px solid rgba(242, 237, 224, 0.12);
+  border-radius: 4px;
+  color: #9A8860;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: color 150ms, border-color 150ms;
+  backdrop-filter: blur(4px);
+}
+
+.boot-replay-btn:hover {
+  color: #F2EDE0;
+  border-color: rgba(242, 237, 224, 0.25);
+}

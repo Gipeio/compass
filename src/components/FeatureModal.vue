@@ -3,7 +3,7 @@
   <div class="overlay" @click.self="$emit('close')">
     <div class="modal">
       <div class="modal-header">
-        <span class="modal-title">{{ isEdit ? 'EDIT STAGE' : 'NEW STAGE' }}</span>
+        <span class="modal-title">{{ isEdit ? 'Edit stage' : 'New stage' }}</span>
         <button class="btn btn-ghost btn-sm" @click="$emit('close')">✕</button>
       </div>
 
@@ -12,7 +12,7 @@
         <div class="form-group">
           <label class="field-label" for="f-title">TITLE *</label>
           <input id="f-title" v-model="form.title" class="input" :class="{ error: errors.title }" type="text" placeholder="User Authentication" />
-          <p v-if="errors.title" class="field-error">Required</p>
+          <p v-if="errors.title" class="field-error">Title is required</p>
         </div>
 
         <!-- Version flag -->
@@ -29,31 +29,27 @@
 
         <!-- Description -->
         <div class="form-group">
-          <label class="field-label" for="f-desc">DESCRIPTION *</label>
+          <label class="field-label" for="f-desc">DESCRIPTION</label>
           <textarea
             id="f-desc"
             v-model="form.description"
             class="textarea"
-            :class="{ error: errors.description }"
             style="min-height:120px"
             placeholder="Complete explanation of what the feature does, how it works, why it matters..."
           ></textarea>
-          <p v-if="errors.description" class="field-error">Required</p>
         </div>
 
         <!-- Acceptance criteria -->
         <div class="form-group">
-          <label class="field-label" for="f-ac">ACCEPTANCE CRITERIA *</label>
+          <label class="field-label" for="f-ac">ACCEPTANCE CRITERIA</label>
           <textarea
             id="f-ac"
             v-model="form.acceptanceCriteriaRaw"
             class="textarea"
-            :class="{ error: errors.acceptanceCriteria }"
             style="min-height:100px"
             placeholder="[ ] User can create account&#10;[ ] User can login&#10;[ ] Session persists after refresh"
           ></textarea>
           <p class="field-hint">One condition per line. Start lines with [ ] for checklist format.</p>
-          <p v-if="errors.acceptanceCriteria" class="field-error">At least one criterion required</p>
         </div>
 
         <!-- Dependencies -->
@@ -81,8 +77,8 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-ghost" @click="$emit('close')">CANCEL</button>
-        <button class="btn btn-primary" @click="save">{{ isEdit ? '▶ UPDATE' : '▶ ADD STAGE' }}</button>
+        <button class="btn btn-ghost" @click="$emit('close')">Cancel</button>
+        <button class="btn btn-primary" @click="save">{{ isEdit ? 'Save' : '+ Add' }}</button>
       </div>
     </div>
   </div>
@@ -98,7 +94,7 @@ const props = defineProps({
 
 const emit = defineEmits(['save', 'close'])
 
-const isEdit = computed(() => !!props.feature?.id && props.feature.title !== '')
+const isEdit = computed(() => !!(props.feature?.id))
 
 const form = reactive({
   title: props.feature?.title ?? '',
@@ -109,22 +105,19 @@ const form = reactive({
   technicalNotes: props.feature?.technicalNotes ?? '',
 })
 
-const errors = reactive({ title: false, description: false, acceptanceCriteria: false })
+const errors = reactive({ title: false })
 
 function save() {
   errors.title = !form.title.trim()
-  errors.description = !form.description.trim()
+  if (errors.title) return
 
   const criteria = form.acceptanceCriteriaRaw
     .split('\n')
     .map((l) => l.trim())
     .filter(Boolean)
-  errors.acceptanceCriteria = criteria.length === 0
-
-  if (errors.title || errors.description || errors.acceptanceCriteria) return
 
   emit('save', {
-    id: props.feature?.id ?? crypto.randomUUID(),
+    id: props.feature?.id || crypto.randomUUID(),
     title: form.title.trim(),
     description: form.description.trim(),
     versionFlag: form.versionFlag,
