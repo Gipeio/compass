@@ -833,12 +833,12 @@ html, body, #app {
   gap: 10px;
   border-bottom: 2px solid var(--t-accent);
   flex-shrink: 0;
-  background: color-mix(in srgb, var(--t-text) 90%, var(--t-bg));
+  background: var(--t-bg);
   position: relative;
   overflow: hidden;
 }
 
-/* Scanlines overlay — the defining LCD effect */
+/* Scanlines — the defining LCD effect (faithful to Glaze t01-écran) */
 .app-header-section::before {
   content: '';
   position: absolute;
@@ -849,8 +849,8 @@ html, body, #app {
     to bottom,
     transparent 0,
     transparent 2px,
-    color-mix(in srgb, var(--t-text) 8%, transparent) 2px,
-    color-mix(in srgb, var(--t-text) 8%, transparent) 3px
+    color-mix(in srgb, var(--t-text) 5%, transparent) 2px,
+    color-mix(in srgb, var(--t-text) 5%, transparent) 3px
   );
 }
 
@@ -863,13 +863,12 @@ html, body, #app {
   margin: 0;
   position: relative;
   z-index: 2;
-  text-shadow: 0 0 16px color-mix(in srgb, var(--t-accent) 50%, transparent);
 }
 
 .app-ascii-sub {
   font-size: 9px;
   letter-spacing: 0.08em;
-  color: color-mix(in srgb, var(--t-bg) 60%, var(--t-muted-3));
+  color: var(--t-muted);
   font-family: ui-monospace, monospace;
   position: relative;
   z-index: 2;
