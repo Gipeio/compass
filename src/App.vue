@@ -34,7 +34,7 @@
         </div>
 
         <div v-if="projects.length === 0" class="panel-empty">
-          <span class="empty-icon">🧭</span>
+          <img src="/logo.svg" class="empty-logo" alt="" />
           <p class="empty-text">NO PROJECTS</p>
         </div>
 
@@ -320,7 +320,7 @@
 
         <!-- Nothing selected -->
         <div v-else class="reading-empty">
-          <span class="empty-icon">🧭</span>
+          <img src="/logo.svg" class="empty-logo empty-logo--lg" alt="" />
           <p class="empty-text">SELECT OR CREATE A PROJECT</p>
         </div>
 

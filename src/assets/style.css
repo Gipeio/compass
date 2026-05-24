@@ -620,11 +620,16 @@ body::before {
   background: var(--t-bg-2);
 }
 
-.empty-icon {
-  font-size: 28px;
-  display: block;
-  margin-bottom: 12px;
+.empty-logo {
+  width: 51px;
+  height: auto;
   opacity: 0.35;
+  margin-bottom: 12px;
+  image-rendering: pixelated;
+}
+
+.empty-logo--lg {
+  width: 102px;
 }
 
 .empty-text {
