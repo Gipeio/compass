@@ -879,3 +879,30 @@ html, body, #app {
   padding: 12px 24px;
   border: 1px solid var(--t-surface);
 }
+
+/* ── App header section (ASCII title) — mirrors Glaze t-header-section ────── */
+
+.app-header-section {
+  padding: 20px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid var(--t-border-2);
+  flex-shrink: 0;
+}
+
+.app-ascii-title {
+  font-size: 11px;
+  line-height: 1.18;
+  color: var(--t-accent);
+  white-space: pre;
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  margin: 0;
+}
+
+.app-ascii-sub {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--t-muted-2);
+  font-family: ui-monospace, monospace;
+}

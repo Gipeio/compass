@@ -101,6 +101,17 @@
       <!-- RIGHT: template form or stage editor ─────────────── -->
       <div class="app-reading">
 
+        <!-- ASCII app header — mirrors Glaze t-header-section pattern -->
+        <div class="app-header-section">
+          <pre class="app-ascii-title"> ██████╗  ██████╗ ███╗   ███╗██████╗  █████╗ ███████╗███████╗
+██╔════╝██╔═══██╗████╗ ████║██╔══██╗██╔══██╗██╔════╝██╔════╝
+██║     ██║   ██║██╔████╔██║██████╔╝███████║███████╗███████╗
+██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██╔══██║╚════██║╚════██║
+╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ██║  ██║███████║███████║
+ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝</pre>
+          <div class="app-ascii-sub">project planner · version planning tool — v0.1</div>
+        </div>
+
         <!-- Template form -->
         <template v-if="activeProject && rightPanel === 'template'">
           <div class="reading-header">
