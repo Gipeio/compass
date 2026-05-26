@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<!--
+  Compass — Logo pixel art (style FL4K)
+  Marque : Pointer — blob organique + aiguille N/S (17 × 14)
+  Technique pixel art FL4K : O contour · K shadow · M body · W highlight
+                              R tip nord · D tip sud · C pivot
+-->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compass — Logo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #F2EDE4; font-family: 'Inter', sans-serif; padding: 36px 44px; display: flex; flex-direction: column; gap: 36px; color: #222220; }
+    h1 { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -0.02em; }
+    .meta { font-size: 12px; color: #9A7848; margin-top: -22px; }
+    .section-title { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #9A7848; margin-bottom: 18px; }
+    canvas, .svg-render { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+
+    .row  { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; }
+    .chip { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .chip-label { font-size: 10px; font-weight: 600; color: #9A7848; letter-spacing: 0.04em; }
+    .chip-sub   { font-size: 10px; color: #B8A078; }
+    .chip-path  { font-family: ui-monospace, 'Cascadia Code', monospace; font-size: 9px; color: #B8A078; }
+
+    .panel-light { background: #FAEBCC; border: 1px solid rgba(74,88,48,0.18); border-radius: 8px; padding: 24px 28px; display: inline-flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+    .panel-dark  { background: #222220; border-radius: 8px; padding: 24px 28px; display: inline-flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+    .panel-page  { background: #F2EDE4; border: 1px solid rgba(74,88,48,0.18); border-radius: 8px; padding: 24px 28px; display: inline-flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+
+    .lockup { display: inline-flex; align-items: center; gap: 12px; }
+    .lockup-name { font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+    .lockup-sub  { font-family: 'Inter', sans-serif; font-weight: 400; margin-top: 3px; }
+  </style>
+</head>
+<body>
+
+<h1>Compass — Logo</h1>
+<div class="meta">Pointer · pixel art FL4K · 17 × 14</div>
+
+<div id="root"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  POINTER — grille pixel art, symétrique verticalement
+//  R = tip nord (rouge) · D = tip sud (noir) · C = pivot crème
+// ─────────────────────────────────────────────────────────────────────────────
+const POINTER = [
+  "....OOOOOOOOO....",
+  "...OKKKKKKKKKO...",
+  "..OKMMMMRMMMMKO..",
+  "..OKWMMMRMMMMKO..",
+  ".OKMMMMRRRMMMMKO.",
+  ".OKMMMRRRRRMMMKO.",
+  ".OKMMRRRCRRRMMKO.",
+  ".OKMMDDDCDDDMMKO.",
+  ".OKMMMDDDDDMMMKO.",
+  ".OKMMMMDDDMMMMKO.",
+  "..OKMMMMDMMMMKO..",
+  "..OKMMMMMMMMMKO..",
+  "...OKKKKKKKKKO...",
+  "....OOOOOOOOO....",
+];
+const PW = POINTER[0].length;  // 17
+const PH = POINTER.length;     // 14
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Palettes — directement reprises de la charte FL4K
+// ─────────────────────────────────────────────────────────────────────────────
+const PALS = {
+  kaki: {
+    label: 'Kaki', sub: 'défaut', file: 'compass-kaki.svg',
+    '.': null, O:'#1E2B10', K:'#4A5830', M:'#738E3C', W:'#FAEBCC',
+    R:'#C84020', D:'#222220', C:'#FAEBCC',
+  },
+  rouge: {
+    label: 'Rouge', sub: 'CTA', file: 'compass-rouge.svg',
+    '.': null, O:'#5A1008', K:'#C84020', M:'#E06030', W:'#FAEBCC',
+    R:'#5A1008', D:'#222220', C:'#FAEBCC',
+  },
+  noir: {
+    label: 'Noir', sub: 'dark', file: 'compass-noir.svg',
+    '.': null, O:'#080806', K:'#222220', M:'#3C3C3A', W:'#FAEBCC',
+    R:'#C84020', D:'#FAEBCC', C:'#FAEBCC',
+  },
+  creme: {
+    label: 'Crème', sub: 'light', file: 'compass-creme.svg',
+    '.': null, O:'#7A5020', K:'#B88848', M:'#FAEBCC', W:'#FFFFFF',
+    R:'#C84020', D:'#222220', C:'#C84020',
+  },
+  orange: {
+    label: 'Orange', sub: 'wip', file: 'compass-orange.svg',
+    '.': null, O:'#5A2000', K:'#D4692A', M:'#E89050', W:'#FAEBCC',
+    R:'#4A5830', D:'#222220', C:'#FAEBCC',
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Dessin canvas
+// ─────────────────────────────────────────────────────────────────────────────
+function drawPointer(canvas, px, palName) {
+  const pal = PALS[palName];
+  canvas.width  = PW * px;
+  canvas.height = PH * px;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  POINTER.forEach((row, y) => {
+    [...row].forEach((ch, x) => {
+      const color = pal[ch];
+      if (!color) return;
+      ctx.fillStyle = color;
+      ctx.fillRect(x * px, y * px, px, px);
+    });
+  });
+}
+
+function makeCanvas(px, palName) {
+  const c = document.createElement('canvas');
+  drawPointer(c, px, palName);
+  return c;
+}
+
+function makeLockup(px, palName, nameColor, subColor, subText) {
+  const wrap = document.createElement('div');
+  wrap.className = 'lockup';
+  wrap.appendChild(makeCanvas(px, palName));
+  const textDiv = document.createElement('div');
+  const namePx = Math.round(px * PH * 0.22);
+  const subPx  = Math.round(px * PH * 0.12);
+  const name = document.createElement('div');
+  name.className = 'lockup-name';
+  name.style.cssText = `font-size:${namePx}px;color:${nameColor};`;
+  name.textContent = 'compass';
+  const sub = document.createElement('div');
+  sub.className = 'lockup-sub';
+  sub.style.cssText = `font-size:${subPx}px;color:${subColor};`;
+  sub.textContent = subText;
+  textDiv.appendChild(name);
+  textDiv.appendChild(sub);
+  wrap.appendChild(textDiv);
+  return wrap;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Build page
+// ─────────────────────────────────────────────────────────────────────────────
+const root = document.getElementById('root');
+
+function section(title) {
+  const wrap = document.createElement('div');
+  const t = document.createElement('div'); t.className = 'section-title'; t.textContent = title;
+  wrap.appendChild(t);
+  root.appendChild(wrap);
+  return wrap;
+}
+
+// ── Variantes palette + chemin du SVG exporté ──────────────────────────────
+{
+  const wrap = section('Variantes palette — SVG exportés dans assets/');
+  const row = document.createElement('div'); row.className = 'row';
+  Object.entries(PALS).forEach(([key, v]) => {
+    const chip = document.createElement('div'); chip.className = 'chip';
+    chip.appendChild(makeCanvas(8, key));
+    const l = document.createElement('div'); l.className = 'chip-label'; l.textContent = v.label;
+    const s = document.createElement('div'); s.className = 'chip-sub';   s.textContent = v.sub;
+    const p = document.createElement('div'); p.className = 'chip-path';  p.textContent = v.file;
+    chip.appendChild(l); chip.appendChild(s); chip.appendChild(p);
+    row.appendChild(chip);
+  });
+  wrap.appendChild(row);
+}
+
+// ── Tailles ─────────────────────────────────────────────────────────────────
+{
+  const wrap = section('Tailles — kaki (défaut)');
+  const row = document.createElement('div'); row.className = 'row';
+  [[2,'34px'],[3,'51px'],[4,'68px'],[6,'102px'],[10,'170px']].forEach(([px, lbl]) => {
+    const chip = document.createElement('div'); chip.className = 'chip';
+    chip.appendChild(makeCanvas(px, 'kaki'));
+    const l = document.createElement('div'); l.className = 'chip-sub'; l.textContent = lbl;
+    chip.appendChild(l);
+    row.appendChild(chip);
+  });
+  wrap.appendChild(row);
+}
+
+// ── Lockup fond clair ───────────────────────────────────────────────────────
+{
+  const wrap = section('Lockup — fond clair (crème)');
+  const panel = document.createElement('div'); panel.className = 'panel-light';
+  panel.appendChild(makeLockup(4, 'kaki',  '#222220', '#9A7848', 'orientation perso'));
+  panel.appendChild(makeLockup(5, 'kaki',  '#222220', '#9A7848', 'orientation perso'));
+  panel.appendChild(makeLockup(5, 'rouge', '#C84020', '#9A7848', 'orientation perso'));
+  wrap.appendChild(panel);
+}
+
+// ── Lockup fond page ────────────────────────────────────────────────────────
+{
+  const wrap = section('Lockup — fond page');
+  const panel = document.createElement('div'); panel.className = 'panel-page';
+  panel.appendChild(makeLockup(4, 'kaki',  '#222220', '#9A7848', 'orientation perso'));
+  panel.appendChild(makeLockup(5, 'kaki',  '#222220', '#9A7848', 'orientation perso'));
+  panel.appendChild(makeLockup(5, 'orange','#D4692A', '#9A7848', 'WIP'));
+  wrap.appendChild(panel);
+}
+
+// ── Lockup fond sombre ──────────────────────────────────────────────────────
+{
+  const wrap = section('Lockup — fond sombre');
+  const panel = document.createElement('div'); panel.className = 'panel-dark';
+  panel.appendChild(makeLockup(4, 'noir',  '#FAEBCC', 'rgba(250,235,204,0.4)', 'orientation perso'));
+  panel.appendChild(makeLockup(5, 'noir',  '#FAEBCC', 'rgba(250,235,204,0.4)', 'orientation perso'));
+  panel.appendChild(makeLockup(5, 'creme', '#FAEBCC', 'rgba(250,235,204,0.4)', 'orientation perso'));
+  wrap.appendChild(panel);
+}
+
+// ── Famille FL4K — Peio · SimuliSQL · Compass ───────────────────────────────
+{
+  const wrap = section('Famille FL4K — côte à côte');
+
+  const panel = document.createElement('div');
+  panel.style.cssText = 'background:#F2EDE4;border:1px solid rgba(74,88,48,0.18);border-radius:8px;padding:24px 28px;display:inline-flex;align-items:center;gap:32px;';
+
+  // Blob (Peio)
+  const BLOB = [
+    "....OOOOOOOOO....",
+    "...OKKKKKKKKKO...",
+    "..OKWMMMMMMMMKO..",
+    "..OKMMMMMMMMMKO..",
+    ".OKMMMMMMMMMMMKO.",
+    ".OKMMXXMMMXXMMKO.",
+    ".OKMMXXMMMXXMMKO.",
+    "OKMMMMMMMMMMMMMKO",
+    "OKMMMMMMMMMMMMMKO",
+    ".OKMMMMMMMMMMMKO.",
+    ".OKKKKKKKKKKKKKO.",
+    "..OOOOOOOOOOOOO..",
+  ];
+  const BPAL = {'.':null,O:'#1E2B10',K:'#4A5830',M:'#738E3C',W:'#FAEBCC',X:'#222220'};
+
+  // SimuliSQL stack
+  const SIMU = [
+    '..OOOOOOOOOO..',
+    '.OKWMMMMMMMKO.',
+    '.OKMMMMMMMMKO.',
+    '.OKMMMMMMMMKO.',
+    '..OOOOOOOOOO..',
+    '.OKMMMMMMMMKO.',
+    '.OKMMMMMMMMKO.',
+    '.OKMMMMMMMMKO.',
+    '..OOOOOOOOOO..',
+    '.OKMMMMMMMMKO.',
+    '.OKMMMMMMMMKO.',
+    '.OKMMMMMMMMKO.',
+    '..OOOOOOOOOO..',
+  ];
+  const SPAL = {'.':null,O:'#061224',K:'#0E2A4E',M:'#1E5A9C',W:'#A0D0FF'};
+
+  function famChip(grid, pal, label, px = 5) {
+    const w = grid[0].length, h = grid.length;
+    const c = document.createElement('canvas');
+    c.style.cssText = 'image-rendering:pixelated;display:block;';
+    c.width = w * px; c.height = h * px;
+    const ctx = c.getContext('2d');
+    grid.forEach((row, y) => [...row].forEach((ch, x) => {
+      if (pal[ch]) { ctx.fillStyle = pal[ch]; ctx.fillRect(x*px, y*px, px, px); }
+    }));
+    const wrapC = document.createElement('div');
+    wrapC.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:6px;';
+    wrapC.appendChild(c);
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'font-size:10px;font-weight:600;color:#9A7848;letter-spacing:0.04em;';
+    lbl.textContent = label;
+    wrapC.appendChild(lbl);
+    return wrapC;
+  }
+  function divider() {
+    const d = document.createElement('div');
+    d.style.cssText = 'width:1px;height:70px;background:rgba(74,88,48,0.18);flex-shrink:0;';
+    return d;
+  }
+
+  panel.appendChild(famChip(BLOB, BPAL, 'Peio'));
+  panel.appendChild(divider());
+  panel.appendChild(famChip(SIMU, SPAL, 'SimuliSQL'));
+  panel.appendChild(divider());
+
+  // Compass — canvas via drawPointer
+  const cpx = 5;
+  const cP = document.createElement('canvas');
+  cP.style.cssText = 'image-rendering:pixelated;display:block;';
+  drawPointer(cP, cpx, 'kaki');
+  const wP = document.createElement('div');
+  wP.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:6px;';
+  wP.appendChild(cP);
+  const lP = document.createElement('div');
+  lP.style.cssText = 'font-size:10px;font-weight:600;color:#9A7848;letter-spacing:0.04em;';
+  lP.textContent = 'Compass';
+  wP.appendChild(lP);
+  panel.appendChild(wP);
+
+  wrap.appendChild(panel);
+}
+</script>
+
+</body>
+</html>

@@ -7,7 +7,7 @@
 import './style.css';
 
 const LOGO_SRC = '/logo.svg';
-const LOGO_SIZE = 96;
+const LOGO_SIZE = 160;
 
 // ── Audio ─────────────────────────────────────────────────────────────────────
 
